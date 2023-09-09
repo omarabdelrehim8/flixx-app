@@ -2,7 +2,7 @@ const global = {
   currentPage: window.location.pathname
 }
 
-
+// Display 20 most popular movies
 async function displayPopularMovies() {
   const {results} = await fetchAPIData("movie/popular");
 
@@ -17,12 +17,12 @@ async function displayPopularMovies() {
         ? `<img
         src="https://image.tmdb.org/t/p/w500${movie.poster_path}"
         class="card-img-top"
-        alt="Movie Title"/>`
+        alt="${movie.title}"/>`
 
         : `<img
         src="images/no-image.jpg"
         class="card-img-top"
-        alt="Movie Title"
+        alt="${movie.title}"
       />`
       }
 
@@ -35,24 +35,66 @@ async function displayPopularMovies() {
     </div>`
     document.getElementById("popular-movies").appendChild(div);
   })
+}
 
-  console.log(results);
+// Display 20 most popular tv shows
+async function displayPopularTVShows() {
+  const {results} = await fetchAPIData("tv/popular");
+
+  results.forEach(show => {
+    const div = document.createElement("div");
+    div.classList.add("card");
+    div.innerHTML = 
+    `<a href="tv-details.html?id=${show.id}">
+      
+      ${
+        show.poster_path 
+        ? `<img
+        src="https://image.tmdb.org/t/p/w500${show.poster_path}"
+        class="card-img-top"
+        alt="${show.name}"/>`
+
+        : `<img
+        src="images/no-image.jpg"
+        class="card-img-top"
+        alt="${show.name}"
+      />`
+      }
+
+    </a>
+    <div class="card-body">
+      <h5 class="card-title">${show.name}</h5>
+      <p class="card-text">
+        <small class="text-muted">Air Date: ${show.first_air_date}</small>
+      </p>
+    </div>`
+    document.getElementById("popular-shows").appendChild(div);
+  })
 }
 
 // Fetch data from TMDB API
 async function fetchAPIData(endpoint) {
-  // API keys shouldn't be directly put inside of js files but this web app is just for learning so it should be ok + it's a free key
+  // API keys shouldn't be directly put inside of js files but this web app is just for learning so it should be ok + it's a free key. You should store your keys and make requests from a server.
 
   const API_KEY = "795ffcee559ac9c58d2b494143a05d7b"
   const API_URL = "https://api.themoviedb.org/3/"
   
+  showSpinner();
   const response = await fetch(`${API_URL}${endpoint}?api_key=${API_KEY}&language=en-US`);
 
   const data = await response.json();
 
+  hideSpinner();
   return data;
 }
 
+function showSpinner() {
+  document.querySelector(".spinner").classList.add("show");
+}
+
+function hideSpinner() {
+  document.querySelector(".spinner").classList.remove("show");
+}
 
 // Highligth active link
 function highlightActiveLink() {
@@ -78,7 +120,7 @@ function init() {
       console.log("Search");
       break;
     case "/shows.html":
-      console.log("Shows");
+      displayPopularTVShows();
       break;
     case "/tv-details.html":
       console.log("TV Details");
@@ -89,3 +131,4 @@ function init() {
 }
 
 document.addEventListener("DOMContentLoaded", init);
+
